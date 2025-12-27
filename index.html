@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Builder Challenge</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        #network-container {
+            width: 100%;
+            max-width: 900px;
+            height: 600px;
+            border: 1px solid #cbd5e0;
+            border-radius: 0.75rem;
+            background-color: #ffffff;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            margin-bottom: 1.5rem;
+        }
+        .message-box {
+            display: none;
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            font-weight: 600;
+        }
+        .message-box.show {
+            display: block;
+        }
+        .message-box.success {
+            background-color: #d1fae5;
+            border-left: 4px solid #34d399;
+            color: #065f46;
+        }
+        .message-box.error {
+            background-color: #fee2e2;
+            border-left: 4px solid #ef4444;
+            color: #991b1b;
+        }
+        .message-box.info {
+            background-color: #e0f2fe;
+            border-left: 4px solid #38bdf8;
+            color: #075985;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="max-w-4xl w-full text-center mb-8">
+        <h1 class="text-4xl font-extrabold text-gray-800 mb-4">
+            Network Builder Challenge
+        </h1>
+        <p class="text-gray-600 text-lg mb-4">
+            Your challenge is to build the following basic network:
+        </p>
+        <ul class="list-disc list-inside text-left text-gray-700 max-w-md mx-auto mb-6">
+            <li>**Devices:** Internet, Firewall, Router, Switch, Web Server, Database Server, 2 Client PCs, Wireless AP, Laptop.</li>
+        </ul>
+        <p class="text-gray-600 text-lg font-semibold">
+            Drag the devices around to arrange them.
+        </p>
+    </div>
+
+    <div id="network-container"></div>
+
+    <div class="flex space-x-4 mb-8">
+        <button id="checkNetworkBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-200">
+            Check Network
+        </button>
+        <button id="resetNetworkBtn" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-200">
+            Reset Network
+        </button>
+    </div>
+
+    <div id="feedbackMessage" class="message-box w-full max-w-md"></div>
+
+    <script type="text/javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+            const container = document.getElementById('network-container');
+            const checkNetworkBtn = document.getElementById('checkNetworkBtn');
+            const resetNetworkBtn = document.getElementById('resetNetworkBtn');
+            const feedbackMessage = document.getElementById('feedbackMessage');
+
+            // Internal IDs and target configs obscured with unrelated words
+            const targetNodesConfig = [
+                { id: 'galaxy', label: 'Internet', group: 'wan', image: 'https://placehold.co/50x50/cccccc/000000?text=🌐', x: 450, y: 50 },
+                { id: 'brick', label: 'Firewall', group: 'security', image: 'https://placehold.co/50x50/ff7f50/ffffff?text=🛡️', x: 450, y: 150 },
+                { id: 'compass', label: 'Router', group: 'network', image: 'https://placehold.co/50x50/6a5acd/ffffff?text=📡', x: 450, y: 250 },
+                { id: 'piano', label: 'Switch', group: 'network', image: 'https://placehold.co/50x50/4682b4/ffffff?text=🔄', x: 350, y: 350 },
+                { id: 'bread', label: 'Web Server', group: 'server', image: 'https://placehold.co/50x50/90ee90/000000?text=💻', x: 550, y: 350 },
+                { id: 'vault', label: 'Database Server', group: 'server', image: 'https://placehold.co/50x50/add8e6/000000?text=💾', x: 150, y: 350 },
+                { id: 'apple', label: 'Client PC 1', group: 'client', image: 'https://placehold.co/50x50/f0e68c/000000?text=🖥️', x: 250, y: 450 },
+                { id: 'banana', label: 'Client PC 2', group: 'client', image: 'https://placehold.co/50x50/f0e68c/000000?text=🖥️', x: 450, y: 450 },
+                { id: 'cloud', label: 'Wireless AP', group: 'network', image: 'https://placehold.co/50x50/dda0dd/000000?text=📶', x: 650, y: 250 },
+                { id: 'paper', label: 'Laptop', group: 'client', image: 'https://placehold.co/50x50/f0e68c/000000?text= portátil', x: 650, y: 350 }
+            ];
+
+            const targetEdgesConfig = [
+                { source: 'Internet', destination: 'Firewall' },
+                { source: 'Firewall', destination: 'Router' },
+                { source: 'Router', destination: 'Switch' },
+                { source: 'Switch', destination: 'Web Server' },
+                { source: 'Switch', destination: 'Database Server' },
+                { source: 'Switch', destination: 'Client PC 1' },
+                { source: 'Switch', destination: 'Client PC 2' },
+                { source: 'Router', destination: 'Wireless AP' },
+                { source: 'Wireless AP', destination: 'Laptop' }
+            ];
+
+            let nodes = new vis.DataSet([]);
+            let edges = new vis.DataSet([]);
+            let network;
+
+            function showFeedback(message, type) {
+                feedbackMessage.textContent = message;
+                feedbackMessage.classList.remove('hidden', 'success', 'error', 'info');
+                feedbackMessage.classList.add('show', type);
+            }
+
+            function initializeNetwork() {
+                nodes = new vis.DataSet(targetNodesConfig.map(node => {
+                    const randomX = Math.random() * (container.clientWidth - 100) + 50;
+                    const randomY = Math.random() * (container.clientHeight - 100) + 50;
+                    return { ...node, x: randomX, y: randomY, fixed: false };
+                }));
+                edges = new vis.DataSet([]);
+
+                const data = { nodes: nodes, edges: edges };
+
+                const options = {
+                    nodes: {
+                        font: { color: '#333333', size: 14, face: 'Roboto, sans-serif' },
+                        color: {
+                            border: '#6b7280',
+                            background: '#d1d5db',
+                            highlight: { border: '#3b82f6', background: '#93c5fd' },
+                            hover: { border: '#3b82f6', background: '#bfdbfe' }
+                        },
+                        shapeProperties: { useBorderWithImage: true },
+                        size: 25
+                    },
+                    edges: {
+                        color: { color: '#6b7280', highlight: '#3b82f6', hover: '#3b82f6', inherit: 'from', opacity: 0.8 },
+                        width: 2,
+                        arrows: 'to',
+                        font: { align: 'middle', color: '#4b5563', size: 12, face: 'Roboto, sans-serif' },
+                        smooth: { enabled: true, type: 'dynamic', roundness: 0.5 }
+                    },
+                    physics: {
+                        enabled: true,
+                        barnesHut: { gravitationalConstant: -2000, centralGravity: 0.3, springLength: 95, springConstant: 0.04, damping: 0.09, avoidOverlap: 0.5 },
+                        solver: 'barnesHut',
+                        stabilization: { enabled: true, iterations: 2000, updateInterval: 25, fit: true }
+                    },
+                    interaction: { hover: true, navigationButtons: true, keyboard: true },
+                    layout: { improvedLayout: true },
+                    manipulation: {
+                        enabled: true,
+                        addNode: false,
+                        addEdge: function(edgeData, callback) {
+                            if (edgeData.from === edgeData.to) {
+                                showFeedback('Cannot connect a device to itself!', 'error');
+                                callback(null);
+                                return;
+                            }
+                            callback(edgeData);
+                            showFeedback('Connection added. Keep building!', 'info');
+                        },
+                    }
+                };
+
+                network = new vis.Network(container, data, options);
+
+                network.once('stabilizationIterationsDone', function() {
+                    network.setOptions({ physics: false });
+                    showFeedback("Drag devices to arrange them, then connect them!", 'info');
+                });
+            }
+
+            function checkNetwork() {
+                const userNodes = nodes.get();
+                const userEdges = edges.get();
+
+                const userNodeLabels = userNodes.map(n => n.label).sort();
+                const targetNodeLabels = targetNodesConfig.map(n => n.label).sort();
+
+                if (userNodeLabels.length !== targetNodeLabels.length ||
+                    !userNodeLabels.every((val, index) => val === targetNodeLabels[index])) {
+                    showFeedback('Incorrect devices or device count. Please review your nodes!', 'error');
+                    return;
+                }
+
+                const userEdgeStrings = new Set();
+                userEdges.forEach(edge => {
+                    const fromNode = nodes.get(edge.from);
+                    const toNode = nodes.get(edge.to);
+                    if (fromNode && toNode) {
+                        const sortedLabels = [fromNode.label, toNode.label].sort();
+                        userEdgeStrings.add(`${sortedLabels[0]}-${sortedLabels[1]}`);
+                    }
+                });
+
+                const targetEdgeStrings = new Set();
+                targetEdgesConfig.forEach(edge => {
+                    const sortedLabels = [edge.source, edge.destination].sort();
+                    targetEdgeStrings.add(`${sortedLabels[0]}-${sortedLabels[1]}`);
+                });
+
+                if (userEdgeStrings.size !== targetEdgeStrings.size ||
+                    ![...targetEdgeStrings].every(edgeStr => userEdgeStrings.has(edgeStr))) {
+                    showFeedback('Incorrect connections. Please review your connections!', 'error');
+                    return;
+                }
+
+                showFeedback('🎉 Congratulations! Your network is perfectly built!', 'success');
+            }
+
+            checkNetworkBtn.addEventListener('click', checkNetwork);
+            resetNetworkBtn.addEventListener('click', initializeNetwork);
+
+            initializeNetwork();
+        });
+    </script>
+</body>
+</html>
