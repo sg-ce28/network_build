@@ -65,7 +65,7 @@
         </p>
         <ul class="list-disc list-inside text-left text-gray-700 max-w-md mx-auto mb-6">
             <li>**Devices:** Internet, Firewall, Router, Switch, Web Server, Database Server, 2 Client PCs, Wireless AP, Laptop.</li>
-        </ul>
+            </ul>
         <p class="text-gray-600 text-lg font-semibold">
             Drag the devices around to arrange them.
         </p>
@@ -91,31 +91,36 @@
             const resetNetworkBtn = document.getElementById('resetNetworkBtn');
             const feedbackMessage = document.getElementById('feedbackMessage');
 
-            // Internal IDs and target configs obscured with unrelated words
+            // _nk = internal node key (obfuscated), label = what users see on screen
             const targetNodesConfig = [
-                { id: 'galaxy', label: 'Internet', group: 'wan', image: 'https://placehold.co/50x50/cccccc/000000?text=🌐', x: 450, y: 50 },
-                { id: 'brick', label: 'Firewall', group: 'security', image: 'https://placehold.co/50x50/ff7f50/ffffff?text=🛡️', x: 450, y: 150 },
-                { id: 'compass', label: 'Router', group: 'network', image: 'https://placehold.co/50x50/6a5acd/ffffff?text=📡', x: 450, y: 250 },
-                { id: 'piano', label: 'Switch', group: 'network', image: 'https://placehold.co/50x50/4682b4/ffffff?text=🔄', x: 350, y: 350 },
-                { id: 'bread', label: 'Web Server', group: 'server', image: 'https://placehold.co/50x50/90ee90/000000?text=💻', x: 550, y: 350 },
-                { id: 'vault', label: 'Database Server', group: 'server', image: 'https://placehold.co/50x50/add8e6/000000?text=💾', x: 150, y: 350 },
-                { id: 'apple', label: 'Client PC 1', group: 'client', image: 'https://placehold.co/50x50/f0e68c/000000?text=🖥️', x: 250, y: 450 },
-                { id: 'banana', label: 'Client PC 2', group: 'client', image: 'https://placehold.co/50x50/f0e68c/000000?text=🖥️', x: 450, y: 450 },
-                { id: 'cloud', label: 'Wireless AP', group: 'network', image: 'https://placehold.co/50x50/dda0dd/000000?text=📶', x: 650, y: 250 },
-                { id: 'paper', label: 'Laptop', group: 'client', image: 'https://placehold.co/50x50/f0e68c/000000?text= portátil', x: 650, y: 350 }
+                { id: 'internet', label: 'Internet', _nk: 'xq7r2mf', group: 'wan', image: 'https://placehold.co/50x50/cccccc/000000?text=🌐', x: 450, y: 50 },
+                { id: 'firewall', label: 'Firewall', _nk: 'b3tz9aw', group: 'security', image: 'https://placehold.co/50x50/ff7f50/ffffff?text=🛡️', x: 450, y: 150 },
+                { id: 'router', label: 'Router', _nk: 'p8dn4vy', group: 'network', image: 'https://placehold.co/50x50/6a5acd/ffffff?text=📡', x: 450, y: 250 },
+                { id: 'switch', label: 'Switch', _nk: 'k1ug6hc', group: 'network', image: 'https://placehold.co/50x50/4682b4/ffffff?text=🔄', x: 350, y: 350 },
+                { id: 'webserver', label: 'Web Server', _nk: 'w5jl0xe', group: 'server', image: 'https://placehold.co/50x50/90ee90/000000?text=💻', x: 550, y: 350 },
+                { id: 'dbserver', label: 'Database Server', _nk: 'n2qs8rb', group: 'server', image: 'https://placehold.co/50x50/add8e6/000000?text=💾', x: 150, y: 350 },
+                { id: 'pc1', label: 'Client PC 1', _nk: 'f6oc3it', group: 'client', image: 'https://placehold.co/50x50/f0e68c/000000?text=🖥️', x: 250, y: 450 },
+                { id: 'pc2', label: 'Client PC 2', _nk: 'v9lk5zu', group: 'client', image: 'https://placehold.co/50x50/f0e68c/000000?text=🖥️', x: 450, y: 450 },
+                { id: 'wirelessap', label: 'Wireless AP', _nk: 'e4hw7gd', group: 'network', image: 'https://placehold.co/50x50/dda0dd/000000?text=📶', x: 650, y: 250 },
+                { id: 'laptop', label: 'Laptop', _nk: 'j0yp1ns', group: 'client', image: 'https://placehold.co/50x50/f0e68c/000000?text= portátil', x: 650, y: 350 }
             ];
 
+            // Edges reference _nk keys instead of human-readable labels
             const targetEdgesConfig = [
-                { source: 'Internet', destination: 'Firewall' },
-                { source: 'Firewall', destination: 'Router' },
-                { source: 'Router', destination: 'Switch' },
-                { source: 'Switch', destination: 'Web Server' },
-                { source: 'Switch', destination: 'Database Server' },
-                { source: 'Switch', destination: 'Client PC 1' },
-                { source: 'Switch', destination: 'Client PC 2' },
-                { source: 'Router', destination: 'Wireless AP' },
-                { source: 'Wireless AP', destination: 'Laptop' }
+                { fromKey: 'xq7r2mf', toKey: 'b3tz9aw' },
+                { fromKey: 'b3tz9aw', toKey: 'p8dn4vy' },
+                { fromKey: 'p8dn4vy', toKey: 'k1ug6hc' },
+                { fromKey: 'k1ug6hc', toKey: 'w5jl0xe' },
+                { fromKey: 'k1ug6hc', toKey: 'n2qs8rb' },
+                { fromKey: 'k1ug6hc', toKey: 'f6oc3it' },
+                { fromKey: 'k1ug6hc', toKey: 'v9lk5zu' },
+                { fromKey: 'p8dn4vy', toKey: 'e4hw7gd' },
+                { fromKey: 'e4hw7gd', toKey: 'j0yp1ns' }
             ];
+
+            // Build a lookup: _nk -> label (used internally for validation)
+            const _nkToLabel = {};
+            targetNodesConfig.forEach(n => { _nkToLabel[n._nk] = n.label; });
 
             let nodes = new vis.DataSet([]);
             let edges = new vis.DataSet([]);
@@ -139,31 +144,70 @@
 
                 const options = {
                     nodes: {
-                        font: { color: '#333333', size: 14, face: 'Roboto, sans-serif' },
+                        font: {
+                            color: '#333333',
+                            size: 14,
+                            face: 'Roboto, sans-serif'
+                        },
                         color: {
                             border: '#6b7280',
                             background: '#d1d5db',
                             highlight: { border: '#3b82f6', background: '#93c5fd' },
                             hover: { border: '#3b82f6', background: '#bfdbfe' }
                         },
-                        shapeProperties: { useBorderWithImage: true },
+                        shapeProperties: {
+                            useBorderWithImage: true
+                        },
                         size: 25
                     },
                     edges: {
-                        color: { color: '#6b7280', highlight: '#3b82f6', hover: '#3b82f6', inherit: 'from', opacity: 0.8 },
+                        color: {
+                            color: '#6b7280',
+                            highlight: '#3b82f6',
+                            hover: '#3b82f6',
+                            inherit: 'from',
+                            opacity: 0.8
+                        },
                         width: 2,
                         arrows: 'to',
-                        font: { align: 'middle', color: '#4b5563', size: 12, face: 'Roboto, sans-serif' },
-                        smooth: { enabled: true, type: 'dynamic', roundness: 0.5 }
+                        font: {
+                            align: 'middle',
+                            color: '#4b5563',
+                            size: 12,
+                            face: 'Roboto, sans-serif'
+                        },
+                        smooth: {
+                            enabled: true,
+                            type: 'dynamic',
+                            roundness: 0.5
+                        }
                     },
                     physics: {
                         enabled: true,
-                        barnesHut: { gravitationalConstant: -2000, centralGravity: 0.3, springLength: 95, springConstant: 0.04, damping: 0.09, avoidOverlap: 0.5 },
+                        barnesHut: {
+                            gravitationalConstant: -2000,
+                            centralGravity: 0.3,
+                            springLength: 95,
+                            springConstant: 0.04,
+                            damping: 0.09,
+                            avoidOverlap: 0.5
+                        },
                         solver: 'barnesHut',
-                        stabilization: { enabled: true, iterations: 2000, updateInterval: 25, fit: true }
+                        stabilization: {
+                            enabled: true,
+                            iterations: 2000,
+                            updateInterval: 25,
+                            fit: true
+                        }
                     },
-                    interaction: { hover: true, navigationButtons: true, keyboard: true },
-                    layout: { improvedLayout: true },
+                    interaction: {
+                        hover: true,
+                        navigationButtons: true,
+                        keyboard: true
+                    },
+                    layout: {
+                        improvedLayout: true
+                    },
                     manipulation: {
                         enabled: true,
                         addNode: false,
@@ -210,9 +254,12 @@
                     }
                 });
 
+                // Resolve _nk keys to labels for comparison
                 const targetEdgeStrings = new Set();
                 targetEdgesConfig.forEach(edge => {
-                    const sortedLabels = [edge.source, edge.destination].sort();
+                    const fromLabel = _nkToLabel[edge.fromKey];
+                    const toLabel   = _nkToLabel[edge.toKey];
+                    const sortedLabels = [fromLabel, toLabel].sort();
                     targetEdgeStrings.add(`${sortedLabels[0]}-${sortedLabels[1]}`);
                 });
 
